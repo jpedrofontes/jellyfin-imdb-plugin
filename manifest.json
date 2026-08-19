@@ -10,11 +10,11 @@
     "versions": [
       {
         "version": "1.0.0.0",
-        "changelog": "Initial stable release",
+        "changelog": "See release notes",
         "targetAbi": "10.11.0.0",
-        "sourceUrl": "",
-        "checksum": "",
-        "timestamp": "2026-08-20T00:00:00Z"
+        "sourceUrl": "https://github.com/jpedrofontes/jellyfin-imdb-plugin/releases/download/v1.0.0/jellyfin-imdb-plugin-v1.0.0.zip",
+        "checksum": "a3fb67590113ee2c86ba778c97807950",
+        "timestamp": "2026-08-19T22:25:44Z"
       }
     ]
   }
