@@ -1,84 +1,20 @@
 [
   {
-    "guid": "8db72461-cd14-4a3c-8093-5891cf02b8d0",
-    "name": "IMDb",
-    "overview": "Fetches IMDb ratings from OMDb and maintains an IMDb Top 250 playlist.",
-    "description": "Automatically updates movie community ratings with real IMDb scores via the OMDb API. Also provides an IMDb poster image provider and a scheduled task to maintain an IMDb Top 250 playlist in correct rank order.",
-    "owner": "jpedrofontes",
     "category": "Metadata",
+    "description": "Fetches IMDb ratings from OMDb and maintains an IMDb Top 250 Movies playlist.",
+    "guid": "8db72461-cd14-4a3c-8093-5891cf02b8d0",
     "imageUrl": "https://raw.githubusercontent.com/jpedrofontes/jellyfin-imdb-plugin/main/thumb.png",
+    "name": "IMDb",
+    "owner": "jpedrofontes",
+    "overview": "Fetches IMDb ratings and posters from OMDb, and maintains the IMDb Top 250 playlist.",
     "versions": [
       {
-        "version": "1.0.6.0",
-        "changelog": "See release notes",
-        "targetAbi": "10.11.0.0",
-        "sourceUrl": "https://github.com/jpedrofontes/jellyfin-imdb-plugin/releases/download/v1.0.6/jellyfin-imdb-plugin-v1.0.6.zip",
-        "checksum": "953f456e959d35a1edbc4f8c80cca0a1",
-        "timestamp": "2026-08-19T19:59:12Z"
-      },
-      {
-        "version": "1.0.5.0",
-        "changelog": "See release notes",
-        "targetAbi": "10.11.0.0",
-        "sourceUrl": "https://github.com/jpedrofontes/jellyfin-imdb-plugin/releases/download/v1.0.5/jellyfin-imdb-plugin-v1.0.5.zip",
-        "checksum": "b5873a05c3531ee981845e62881d294e",
-        "timestamp": "2026-08-19T19:39:41Z"
-      },
-      {
-        "version": "1.0.4.0",
-        "changelog": "See release notes",
-        "targetAbi": "10.10.0.0",
-        "sourceUrl": "https://github.com/jpedrofontes/jellyfin-imdb-plugin/releases/download/v1.0.4/jellyfin-imdb-plugin-v1.0.4.zip",
-        "checksum": "ea4f69d3c93722fab27d0683388bd488",
-        "timestamp": "2026-08-19T19:05:06Z"
-      },
-      {
-        "version": "1.0.3.0",
-        "changelog": "See release notes",
-        "targetAbi": "10.11.0.0",
-        "sourceUrl": "https://github.com/jpedrofontes/jellyfin-imdb-plugin/releases/download/v1.0.3/jellyfin-imdb-plugin-v1.0.3.zip",
-        "checksum": "8c54d09af3121848816add7cab6e70c2",
-        "timestamp": "2026-08-19T18:20:21Z"
-      },
-      {
-        "version": "1.0.2.0",
-        "changelog": "See release notes",
-        "targetAbi": "10.11.0.0",
-        "sourceUrl": "https://github.com/jpedrofontes/jellyfin-imdb-plugin/releases/download/v1.0.2/jellyfin-imdb-plugin-v1.0.2.zip",
-        "checksum": "a1ffd2ea1ac56ea86941760086e96ed8",
-        "timestamp": "2026-08-19T17:57:38Z"
-      },
-      {
-        "version": "1.0.1.0",
-        "changelog": "See release notes",
-        "targetAbi": "10.11.0.0",
-        "sourceUrl": "https://github.com/jpedrofontes/jellyfin-imdb-plugin/releases/download/v1.0.1/jellyfin-imdb-plugin-v1.0.1.zip",
-        "checksum": "5051b3a26df372623a5b97982cd09985",
-        "timestamp": "2026-08-19T17:51:05Z"
-      },
-      {
         "version": "1.0.0.0",
-        "changelog": "See release notes",
+        "changelog": "Initial stable release",
         "targetAbi": "10.11.0.0",
-        "sourceUrl": "https://github.com/jpedrofontes/jellyfin-imdb-plugin/releases/download/v1.0.0/jellyfin-imdb-plugin-v1.0.0.zip",
-        "checksum": "464e5be32e54c9d79bc5f8560fc020c7",
-        "timestamp": "2026-08-19T17:35:10Z"
-      },
-      {
-        "version": "0.0.6.0",
-        "changelog": "See release notes",
-        "targetAbi": "10.11.0.0",
-        "sourceUrl": "https://github.com/jpedrofontes/jellyfin-imdb-plugin/releases/download/v0.0.6/jellyfin-imdb-plugin-v0.0.6.zip",
-        "checksum": "432b01033248f5dc956aeff22e859b0d",
-        "timestamp": "2026-08-19T22:24:20Z"
-      },
-      {
-        "version": "0.0.1.0",
-        "changelog": "See release notes",
-        "targetAbi": "10.9.0.0",
-        "sourceUrl": "https://github.com/jpedrofontes/jellyfin-imdb-plugin/releases/download/v0.0.1/jellyfin-imdb-plugin-v0.0.1.zip",
-        "checksum": "e609f1ed2161bf48bad815e9d2a5a40d",
-        "timestamp": "2026-08-19T22:23:59Z"
+        "sourceUrl": "",
+        "checksum": "",
+        "timestamp": "2026-08-20T00:00:00Z"
       }
     ]
   }
