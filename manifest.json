@@ -6,7 +6,7 @@
     "description": "Automatically updates movie community ratings with real IMDb scores via the OMDb API. Also provides an IMDb poster image provider and a scheduled task to maintain an IMDb Top 250 playlist in correct rank order.",
     "owner": "jpedrofontes",
     "category": "Metadata",
-    "imageUrl": "https://raw.githubusercontent.com/jpedrofontes/jellyfin-imdb-plugin/main/thumb.png",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/IMDB_Logo_2016.svg/600px-IMDB_Logo_2016.svg.png",
     "versions": [
       {
         "version": "1.0.3.0",
