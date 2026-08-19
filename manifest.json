@@ -8,20 +8,20 @@
     "category": "Metadata",
     "versions": [
       {
+        "version": "1.0.1.0",
+        "changelog": "See release notes",
+        "targetAbi": "10.9.0.0",
+        "sourceUrl": "https://github.com/jpedrofontes/jellyfin-imdb-plugin/releases/download/v1.0.1/jellyfin-imdb-plugin-v1.0.1.zip",
+        "checksum": "5051b3a26df372623a5b97982cd09985",
+        "timestamp": "2026-08-19T17:51:05Z"
+      },
+      {
         "version": "1.0.2.0",
         "changelog": "See release notes",
         "targetAbi": "10.9.0.0",
         "sourceUrl": "https://github.com/jpedrofontes/jellyfin-imdb-plugin/releases/download/v1.0.2/jellyfin-imdb-plugin-v1.0.2.zip",
         "checksum": "903b1becf6e5cc667688d729e36e8842",
         "timestamp": "2026-08-19T17:49:30Z"
-      },
-      {
-        "version": "1.0.1.0",
-        "changelog": "See release notes",
-        "targetAbi": "10.9.0.0",
-        "sourceUrl": "https://github.com/jpedrofontes/jellyfin-imdb-plugin/releases/download/v1.0.1/jellyfin-imdb-plugin-v1.0.1.zip",
-        "checksum": "e3b5ce6d8572bd206c63fcf2715c616f",
-        "timestamp": "2026-08-19T17:41:23Z"
       },
       {
         "version": "1.0.0.0",
