@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>IMDb Plugin</title>
+</head>
+<body>
+    <div id="ImdbPluginConfigPage" data-role="page" class="page type-interior pluginConfigurationPage"
+         data-require="emby-input,emby-button,emby-checkbox">
+        <div data-role="content">
+            <div class="content-primary">
+                <form id="ImdbPluginConfigForm">
+                    <div class="sectionTitleContainer flex align-items-center">
+                        <h2 class="sectionTitle">IMDb Plugin Settings</h2>
+                    </div>
+
+                    <div class="inputContainer">
+                        <label class="inputLabel" for="txtOmdbApiKey">OMDb API Key</label>
+                        <input is="emby-input" type="text" id="txtOmdbApiKey"
+                               placeholder="Get one at omdbapi.com/apikey.aspx" />
+                        <div class="fieldDescription">
+                            Required for fetching IMDb ratings and posters. Free tier allows 1,000 requests/day.
+                        </div>
+                    </div>
+
+                    <div class="sectionTitleContainer flex align-items-center" style="margin-top:2em">
+                        <h2 class="sectionTitle">IMDb Ratings Task</h2>
+                    </div>
+
+                    <div class="checkboxContainer">
+                        <label class="emby-checkbox-label">
+                            <input is="emby-checkbox" type="checkbox" id="chkEnableRatings" />
+                            <span>Enable scheduled IMDb ratings updates</span>
+                        </label>
+                    </div>
+
+                    <div class="sectionTitleContainer flex align-items-center" style="margin-top:2em">
+                        <h2 class="sectionTitle">Top 250 Playlist</h2>
+                    </div>
+
+                    <div class="checkboxContainer">
+                        <label class="emby-checkbox-label">
+                            <input is="emby-checkbox" type="checkbox" id="chkEnablePlaylist" />
+                            <span>Enable scheduled Top 250 playlist updates</span>
+                        </label>
+                    </div>
+
+                    <div class="inputContainer">
+                        <label class="inputLabel" for="txtPlaylistId">Playlist ID</label>
+                        <input is="emby-input" type="text" id="txtPlaylistId"
+                               placeholder="The Jellyfin playlist ID (GUID, no dashes)" />
+                        <div class="fieldDescription">
+                            Create a playlist in Jellyfin first, then find its ID in the URL when you open it.
+                        </div>
+                    </div>
+
+                    <div class="inputContainer">
+                        <label class="inputLabel" for="txtUserId">User ID</label>
+                        <input is="emby-input" type="text" id="txtUserId"
+                               placeholder="Jellyfin user ID (GUID, no dashes)" />
+                        <div class="fieldDescription">
+                            The user ID that owns the playlist. Find it in Dashboard → Users → click user → URL.
+                        </div>
+                    </div>
+
+                    <div class="inputContainer">
+                        <label class="inputLabel" for="txtCacheHours">Chart Cache Duration (hours)</label>
+                        <input is="emby-input" type="number" id="txtCacheHours" min="1" max="168"
+                               placeholder="24" />
+                        <div class="fieldDescription">
+                            How long to cache the IMDb Top 250 chart before re-fetching. Default: 24 hours.
+                        </div>
+                    </div>
+
+                    <div>
+                        <button is="emby-button" type="submit" class="raised button-submit block emby-button">
+                            <span>Save</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        var ImdbPluginConfig = {
+            pluginUniqueId: '8db72461-cd14-4a3c-8093-5891cf02b8d0'
+        };
+
+        document.querySelector('#ImdbPluginConfigPage')
+            .addEventListener('pageshow', function () {
+                Dashboard.showLoadingMsg();
+                ApiClient.getPluginConfiguration(ImdbPluginConfig.pluginUniqueId).then(function (config) {
+                    document.querySelector('#txtOmdbApiKey').value = config.OmdbApiKey || '';
+                    document.querySelector('#txtPlaylistId').value = config.PlaylistId || '';
+                    document.querySelector('#txtUserId').value = config.UserId || '';
+                    document.querySelector('#txtCacheHours').value = config.ChartCacheHours || 24;
+                    document.querySelector('#chkEnableRatings').checked = config.EnableRatingsTask !== false;
+                    document.querySelector('#chkEnablePlaylist').checked = config.EnablePlaylistTask !== false;
+                    Dashboard.hideLoadingMsg();
+                });
+            });
+
+        document.querySelector('#ImdbPluginConfigForm')
+            .addEventListener('submit', function (e) {
+                e.preventDefault();
+                Dashboard.showLoadingMsg();
+                ApiClient.getPluginConfiguration(ImdbPluginConfig.pluginUniqueId).then(function (config) {
+                    config.OmdbApiKey = document.querySelector('#txtOmdbApiKey').value.trim();
+                    config.PlaylistId = document.querySelector('#txtPlaylistId').value.trim();
+                    config.UserId = document.querySelector('#txtUserId').value.trim();
+                    config.ChartCacheHours = parseInt(document.querySelector('#txtCacheHours').value) || 24;
+                    config.EnableRatingsTask = document.querySelector('#chkEnableRatings').checked;
+                    config.EnablePlaylistTask = document.querySelector('#chkEnablePlaylist').checked;
+                    ApiClient.updatePluginConfiguration(ImdbPluginConfig.pluginUniqueId, config).then(function () {
+                        Dashboard.processPluginConfigurationUpdateResult();
+                    });
+                });
+                return false;
+            });
+    </script>
+</body>
+</html>
