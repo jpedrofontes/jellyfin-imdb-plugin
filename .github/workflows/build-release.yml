@@ -21,7 +21,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0.x'
+          dotnet-version: '9.0.x'
 
       - name: Build plugin
         run: |
@@ -56,7 +56,7 @@ jobs:
              --arg cs "$CHECKSUM" \
              --arg ts "$TIMESTAMP" \
              --arg url "$SOURCE_URL" \
-             --arg abi "10.10.0.0" \
+             --arg abi "10.11.0.0" \
              '.[0].versions = ([{ version: $ver, changelog: "See release notes", targetAbi: $abi, sourceUrl: $url, checksum: $cs, timestamp: $ts }] + [.[0].versions[] | select(.version != $ver)]) | .[0].versions |= sort_by(.version | split(".") | map(tonumber)) | .[0].versions |= reverse' \
              manifest.json > manifest_updated.json
           mv manifest_updated.json manifest.json

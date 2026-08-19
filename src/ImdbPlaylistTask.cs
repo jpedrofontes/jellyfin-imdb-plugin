@@ -1,6 +1,7 @@
 using System.Net.Http;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using Jellyfin.Data.Enums;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Controller.Playlists;
@@ -15,14 +16,16 @@ public class ImdbPlaylistTask : IScheduledTask
     private static readonly HttpClient _httpClient = new();
     private readonly ILibraryManager _libraryManager;
     private readonly IPlaylistManager _playlistManager;
+    private readonly IUserManager _userManager;
 
     private static Dictionary<string, int>? _cachedRanks;
     private static DateTime _cacheTime = DateTime.MinValue;
 
-    public ImdbPlaylistTask(ILibraryManager libraryManager, IPlaylistManager playlistManager)
+    public ImdbPlaylistTask(ILibraryManager libraryManager, IPlaylistManager playlistManager, IUserManager userManager)
     {
         _libraryManager = libraryManager;
         _playlistManager = playlistManager;
+        _userManager = userManager;
     }
 
     public string Name => "Refresh IMDb Top 250 Playlist";
@@ -36,7 +39,8 @@ public class ImdbPlaylistTask : IScheduledTask
         if (config == null || !config.EnablePlaylistTask)
             return;
 
-        if (string.IsNullOrWhiteSpace(config.UserId))
+        var userId = ResolveUserId(config);
+        if (userId == Guid.Empty)
             return;
 
         progress.Report(0);
@@ -50,7 +54,7 @@ public class ImdbPlaylistTask : IScheduledTask
 
         var movies = _libraryManager.GetItemList(new InternalItemsQuery
         {
-            IncludeItemTypes = new[] { Jellyfin.Data.Enums.BaseItemKind.Movie },
+            IncludeItemTypes = new[] { BaseItemKind.Movie },
             IsVirtualItem = false,
             Recursive = true,
         });
@@ -74,8 +78,6 @@ public class ImdbPlaylistTask : IScheduledTask
 
         progress.Report(60);
 
-        var userId = Guid.Parse(config.UserId);
-
         // Find or create the playlist
         Playlist? playlist = null;
         if (!string.IsNullOrWhiteSpace(config.PlaylistId) && Guid.TryParse(config.PlaylistId, out var playlistGuid))
@@ -86,7 +88,7 @@ public class ImdbPlaylistTask : IScheduledTask
             // Search for an existing "IMDb Top 250" playlist
             var playlists = _libraryManager.GetItemList(new InternalItemsQuery
             {
-                IncludeItemTypes = new[] { Jellyfin.Data.Enums.BaseItemKind.Playlist },
+                IncludeItemTypes = new[] { BaseItemKind.Playlist },
                 Recursive = true,
             });
             playlist = playlists
@@ -115,7 +117,10 @@ public class ImdbPlaylistTask : IScheduledTask
         }
 
         // Remove all existing entries
-        var existing = playlist.GetChildren(null, true).ToList();
+        var existing = _libraryManager.GetItemList(new InternalItemsQuery
+        {
+            ParentId = playlist.Id,
+        }).ToList();
         if (existing.Count > 0)
         {
             var entryIds = existing.Select(e => e.Id.ToString("N")).ToList();
@@ -208,11 +213,20 @@ public class ImdbPlaylistTask : IScheduledTask
         }
     }
 
+    private Guid ResolveUserId(PluginConfiguration config)
+    {
+        if (!string.IsNullOrWhiteSpace(config.UserId) && Guid.TryParse(config.UserId, out var explicit_id))
+            return explicit_id;
+
+        var firstUser = _userManager.GetFirstUser();
+        return firstUser?.Id ?? Guid.Empty;
+    }
+
     public IEnumerable<TaskTriggerInfo> GetDefaultTriggers()
     {
         yield return new TaskTriggerInfo
         {
-            Type = "IntervalTrigger",
+            Type = TaskTriggerInfoType.IntervalTrigger,
             IntervalTicks = TimeSpan.FromHours(6).Ticks
         };
     }

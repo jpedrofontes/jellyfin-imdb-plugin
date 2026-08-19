@@ -97,7 +97,7 @@ public class ImdbRatingsTask : IScheduledTask
         // Run daily at 3:30am (30 min after Jellyfin's typical library scan)
         yield return new TaskTriggerInfo
         {
-            Type = "DailyTrigger",
+            Type = TaskTriggerInfoType.DailyTrigger,
             TimeOfDayTicks = TimeSpan.FromHours(3.5).Ticks
         };
     }
