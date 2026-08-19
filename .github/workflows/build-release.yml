@@ -1,0 +1,73 @@
+name: Build and Release Plugin
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Build plugin
+        run: |
+          dotnet build src/Jellyfin.Plugin.ImdbRatings.csproj \
+            -c Release \
+            -o ./output
+
+      - name: Package plugin
+        run: |
+          cd output
+          zip -r ../jellyfin-imdb-plugin-${{ github.ref_name }}.zip Jellyfin.Plugin.ImdbRatings.dll
+
+      - name: Compute checksum
+        id: checksum
+        run: |
+          CHECKSUM=$(md5sum jellyfin-imdb-plugin-${{ github.ref_name }}.zip | awk '{print $1}')
+          echo "md5=$CHECKSUM" >> $GITHUB_OUTPUT
+
+      - name: Update manifest.json
+        run: |
+          VERSION="${{ github.ref_name }}"
+          VERSION="${VERSION#v}"
+          CHECKSUM="${{ steps.checksum.outputs.md5 }}"
+          TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          SOURCE_URL="https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/jellyfin-imdb-plugin-${{ github.ref_name }}.zip"
+
+          jq --arg ver "${VERSION}.0" \
+             --arg cs "$CHECKSUM" \
+             --arg ts "$TIMESTAMP" \
+             --arg url "$SOURCE_URL" \
+             --arg abi "10.9.0.0" \
+             '.[0].versions = [{ version: $ver, changelog: "See release notes", targetAbi: $abi, sourceUrl: $url, checksum: $cs, timestamp: $ts }] + [.[0].versions[] | select(.version != $ver)]' \
+             manifest.json > manifest_updated.json
+          mv manifest_updated.json manifest.json
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: jellyfin-imdb-plugin-${{ github.ref_name }}.zip
+          generate_release_notes: true
+
+      - name: Commit updated manifest
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout main
+          git add manifest.json
+          git diff --cached --quiet || git commit -m "Update manifest for ${{ github.ref_name }}"
+          git push

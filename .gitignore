@@ -1,0 +1,11 @@
+bin/
+obj/
+output/
+*.zip
+*.dll
+*.user
+*.suo
+.vs/
+.idea/
+*.swp
+*_cache.json
