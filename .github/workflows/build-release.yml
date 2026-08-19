@@ -62,6 +62,7 @@ jobs:
         with:
           files: jellyfin-imdb-plugin-${{ github.ref_name }}.zip
           generate_release_notes: true
+          draft: true
 
       - name: Commit updated manifest
         run: |
