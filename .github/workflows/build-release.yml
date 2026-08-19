@@ -57,11 +57,10 @@ jobs:
              manifest.json > manifest_updated.json
           mv manifest_updated.json manifest.json
 
-      - name: Upload zip artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: jellyfin-imdb-plugin-${{ github.ref_name }}
-          path: jellyfin-imdb-plugin-${{ github.ref_name }}.zip
+      - name: Upload zip to release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload ${{ github.ref_name }} jellyfin-imdb-plugin-${{ github.ref_name }}.zip
 
       - name: Commit updated manifest
         run: |
