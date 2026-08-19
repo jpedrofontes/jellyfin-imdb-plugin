@@ -57,12 +57,11 @@ jobs:
              manifest.json > manifest_updated.json
           mv manifest_updated.json manifest.json
 
-      - name: Create Release
-        uses: softprops/action-gh-release@v2
+      - name: Upload zip artifact
+        uses: actions/upload-artifact@v4
         with:
-          files: jellyfin-imdb-plugin-${{ github.ref_name }}.zip
-          generate_release_notes: true
-          draft: true
+          name: jellyfin-imdb-plugin-${{ github.ref_name }}
+          path: jellyfin-imdb-plugin-${{ github.ref_name }}.zip
 
       - name: Commit updated manifest
         run: |
