@@ -9,6 +9,14 @@
     "imageUrl": "https://raw.githubusercontent.com/jpedrofontes/jellyfin-imdb-plugin/main/thumb.png",
     "versions": [
       {
+        "version": "0.0.1.0",
+        "changelog": "See release notes",
+        "targetAbi": "10.9.0.0",
+        "sourceUrl": "https://github.com/jpedrofontes/jellyfin-imdb-plugin/releases/download/v0.0.1/jellyfin-imdb-plugin-v0.0.1.zip",
+        "checksum": "e609f1ed2161bf48bad815e9d2a5a40d",
+        "timestamp": "2026-08-19T22:23:59Z"
+      },
+      {
         "version": "1.0.6.0",
         "changelog": "See release notes",
         "targetAbi": "10.11.0.0",
