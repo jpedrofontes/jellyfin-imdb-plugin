@@ -25,8 +25,12 @@ jobs:
 
       - name: Build plugin
         run: |
+          VERSION="${{ github.ref_name }}"
+          VERSION="${VERSION#v}"
           dotnet build src/Jellyfin.Plugin.ImdbRatings.csproj \
             -c Release \
+            -p:Version=${VERSION}.0 \
+            -p:AssemblyVersion=${VERSION}.0 \
             -o ./output
 
       - name: Package plugin
