@@ -1,11 +1,12 @@
 [
   {
     "guid": "8db72461-cd14-4a3c-8093-5891cf02b8d0",
-    "name": "IMDb Ratings & Top 250",
+    "name": "IMDb",
     "overview": "Fetches IMDb ratings from OMDb and maintains an IMDb Top 250 playlist.",
     "description": "Automatically updates movie community ratings with real IMDb scores via the OMDb API. Also provides an IMDb poster image provider and a scheduled task to maintain an IMDb Top 250 playlist in correct rank order.",
     "owner": "jpedrofontes",
     "category": "Metadata",
+    "imageUrl": "https://raw.githubusercontent.com/jpedrofontes/jellyfin-imdb-plugin/main/thumb.png",
     "versions": [
       {
         "version": "1.0.2.0",
