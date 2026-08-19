@@ -1,7 +1,7 @@
 # Jellyfin IMDb Plugin
 
 <p align="center">
-  <img src="images/banner.svg" alt="Jellyfin IMDb Plugin" width="728" />
+  <img src="https://upload.wikimedia.org/wikipedia/commons/6/69/IMDB_Logo_2016.svg" alt="IMDb" height="80" />
 </p>
 
 <p align="center">
@@ -10,13 +10,13 @@
   <img src="https://img.shields.io/badge/jellyfin-10.9%2B-00a4dc?style=flat-square&logo=jellyfin" alt="Jellyfin 10.9+" />
 </p>
 
-A Jellyfin plugin that replaces community ratings with real IMDb scores and automatically maintains an **IMDb Top 250** playlist in your library.
+A Jellyfin plugin that replaces community ratings with real IMDb scores and automatically maintains an **IMDb Top 250 Movies** playlist in your library.
 
 ## Features
 
-- **IMDb Ratings** — Scheduled task that updates the community rating for every movie in your library with the actual IMDb score (via the [OMDb API](https://www.omdbapi.com))
-- **IMDb Poster Provider** — Remote image provider that makes IMDb/OMDb posters available alongside your existing providers
-- **Top 250 Playlist** — Automatically creates and maintains an "IMDb Top 250" playlist ordered by the live IMDb chart — no scripts or cron jobs required
+- **IMDb Ratings** - Updates the community rating for every movie in your library with the actual IMDb score (via the [OMDb API](https://www.omdbapi.com))
+- **IMDb Poster Provider** - Remote image provider that makes IMDb/OMDb posters available alongside your existing providers
+- **Top 250 Playlist** - Automatically creates and maintains an "IMDb Top 250 Movies" playlist ordered by the live IMDb chart, no scripts or cron jobs required
 
 ## Installation
 
@@ -53,7 +53,7 @@ After installing, go to **Dashboard → Plugins → IMDb**:
 | **Enable Playlist Task** | Toggle the Top 250 playlist sync on/off. |
 | **Chart Cache (hours)** | How long to cache the IMDb chart before re-fetching (default: 24h). |
 
-The Top 250 playlist is automatically found by name or created on the first run — no manual setup needed.
+The Top 250 playlist is automatically found by name or created on the first run. No manual setup needed.
 
 ## How It Works
 

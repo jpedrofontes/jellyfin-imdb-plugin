@@ -91,14 +91,14 @@ public class ImdbPlaylistTask : IScheduledTask
             });
             playlist = playlists
                 .OfType<Playlist>()
-                .FirstOrDefault(p => p.Name.Contains("IMDb Top 250", StringComparison.OrdinalIgnoreCase));
+                .FirstOrDefault(p => p.Name.Contains("IMDb Top 250 Movies", StringComparison.OrdinalIgnoreCase));
         }
 
         if (playlist == null)
         {
             var result = await _playlistManager.CreatePlaylist(new PlaylistCreationRequest
             {
-                Name = "IMDb Top 250",
+                Name = "IMDb Top 250 Movies",
                 UserId = userId,
             }).ConfigureAwait(false);
 
