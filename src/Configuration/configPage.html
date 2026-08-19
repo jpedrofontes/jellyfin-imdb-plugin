@@ -86,34 +86,41 @@
             pluginUniqueId: '8db72461-cd14-4a3c-8093-5891cf02b8d0'
         };
 
-        document.querySelector('#ImdbPluginConfigPage')
-            .addEventListener('pageshow', function () {
-                Dashboard.showLoadingMsg();
-                ApiClient.getPluginConfiguration(ImdbPluginConfig.pluginUniqueId).then(function (config) {
-                    document.querySelector('#txtOmdbApiKey').value = config.OmdbApiKey || '';
-                    document.querySelector('#txtPlaylistId').value = config.PlaylistId || '';
-                    document.querySelector('#txtUserId').value = config.UserId || '';
-                    document.querySelector('#txtCacheHours').value = config.ChartCacheHours || 24;
-                    document.querySelector('#chkEnableRatings').checked = config.EnableRatingsTask !== false;
-                    document.querySelector('#chkEnablePlaylist').checked = config.EnablePlaylistTask !== false;
-                    Dashboard.hideLoadingMsg();
-                });
+        function loadConfig() {
+            Dashboard.showLoadingMsg();
+            ApiClient.getPluginConfiguration(ImdbPluginConfig.pluginUniqueId).then(function (config) {
+                document.querySelector('#txtOmdbApiKey').value = config.OmdbApiKey || '';
+                document.querySelector('#txtPlaylistId').value = config.PlaylistId || '';
+                document.querySelector('#txtUserId').value = config.UserId || '';
+                document.querySelector('#txtCacheHours').value = config.ChartCacheHours || 24;
+                document.querySelector('#chkEnableRatings').checked = config.EnableRatingsTask !== false;
+                document.querySelector('#chkEnablePlaylist').checked = config.EnablePlaylistTask !== false;
+                Dashboard.hideLoadingMsg();
+            }).catch(function () {
+                Dashboard.hideLoadingMsg();
             });
+        }
+
+        document.querySelector('#ImdbPluginConfigPage').addEventListener('pageshow', loadConfig);
+        document.querySelector('#ImdbPluginConfigPage').addEventListener('viewshow', loadConfig);
 
         document.querySelector('#ImdbPluginConfigForm')
             .addEventListener('submit', function (e) {
                 e.preventDefault();
                 Dashboard.showLoadingMsg();
-                ApiClient.getPluginConfiguration(ImdbPluginConfig.pluginUniqueId).then(function (config) {
-                    config.OmdbApiKey = document.querySelector('#txtOmdbApiKey').value.trim();
-                    config.PlaylistId = document.querySelector('#txtPlaylistId').value.trim();
-                    config.UserId = document.querySelector('#txtUserId').value.trim();
-                    config.ChartCacheHours = parseInt(document.querySelector('#txtCacheHours').value) || 24;
-                    config.EnableRatingsTask = document.querySelector('#chkEnableRatings').checked;
-                    config.EnablePlaylistTask = document.querySelector('#chkEnablePlaylist').checked;
-                    ApiClient.updatePluginConfiguration(ImdbPluginConfig.pluginUniqueId, config).then(function () {
-                        Dashboard.processPluginConfigurationUpdateResult();
-                    });
+                var config = {
+                    OmdbApiKey: document.querySelector('#txtOmdbApiKey').value.trim(),
+                    PlaylistId: document.querySelector('#txtPlaylistId').value.trim(),
+                    UserId: document.querySelector('#txtUserId').value.trim(),
+                    ChartCacheHours: parseInt(document.querySelector('#txtCacheHours').value, 10) || 24,
+                    EnableRatingsTask: document.querySelector('#chkEnableRatings').checked === true,
+                    EnablePlaylistTask: document.querySelector('#chkEnablePlaylist').checked === true
+                };
+                ApiClient.updatePluginConfiguration(ImdbPluginConfig.pluginUniqueId, config).then(function () {
+                    Dashboard.processPluginConfigurationUpdateResult();
+                }).catch(function (err) {
+                    Dashboard.hideLoadingMsg();
+                    Dashboard.processErrorResponse(err);
                 });
                 return false;
             });
