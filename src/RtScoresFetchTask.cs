@@ -131,6 +131,51 @@ public class RtScoresFetchTask : IScheduledTask
             }
         }
 
+        // Fallback: search RT by title + year
+        await Task.Delay(TimeSpan.FromSeconds(RequestDelay), cancellationToken);
+        var searchSlug = await SearchRtSlug(title, year, cancellationToken);
+        if (searchSlug != null)
+        {
+            await Task.Delay(TimeSpan.FromSeconds(RequestDelay), cancellationToken);
+            var result = await TryFetchSlug(searchSlug, cancellationToken);
+            if (result != null)
+            {
+                slugCache[imdbId] = searchSlug;
+                return result;
+            }
+        }
+
+        return null;
+    }
+
+    private async Task<string?> SearchRtSlug(string title, int? year, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var query = Uri.EscapeDataString(title);
+            using var request = new HttpRequestMessage(HttpMethod.Get,
+                $"https://www.rottentomatoes.com/search?search={query}");
+            request.Headers.Add("User-Agent",
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36");
+
+            using var response = await _httpClient.SendAsync(request,
+                HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+            if (!response.IsSuccessStatusCode) return null;
+
+            var html = await response.Content.ReadAsStringAsync(cancellationToken);
+
+            // Match search results: <a href="https://www.rottentomatoes.com/m/SLUG" ...> near release-year="YEAR"
+            var pattern = @"release-year=""(\d+)""[^>]*>.*?href=""https://www\.rottentomatoes\.com/m/([^""]+)""";
+            foreach (Match match in Regex.Matches(html, pattern, RegexOptions.Singleline))
+            {
+                var resultYear = int.Parse(match.Groups[1].Value, CultureInfo.InvariantCulture);
+                var slug = match.Groups[2].Value;
+                // Accept if year matches or is within 1 year
+                if (!year.HasValue || Math.Abs(resultYear - year.Value) <= 1)
+                    return slug;
+            }
+        }
+        catch { }
         return null;
     }
 
