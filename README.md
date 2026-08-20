@@ -48,8 +48,7 @@ Go to **Dashboard > Plugins > Movie Ratings (IMDb + RT)**:
 | **OMDb API Key** | Optional. Only needed for the poster provider. Get a free key at [omdbapi.com](https://www.omdbapi.com/apikey.aspx). |
 | **Enable Ratings Task** | Toggle the scheduled IMDb ratings sync on/off. |
 | **Enable Playlist Task** | Toggle the Top 250 playlist sync on/off. |
-| **Enable RT Audience Task** | Toggle the RT scores fetch on/off. |
-| **User ID** | Jellyfin user ID for the Top 250 playlist. |
+| **Enable RT Scores Task** | Toggle the RT scores fetch on/off. |
 | **Chart Cache (hours)** | How long to cache the IMDb chart before re-fetching (default: 24h). |
 
 ## RT Badges Setup (Docker)
