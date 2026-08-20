@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>IMDb Plugin</title>
+    <title>Movie Ratings (IMDb + RT)</title>
 </head>
 <body>
     <div id="ImdbPluginConfigPage" data-role="page" class="page type-interior pluginConfigurationPage"
@@ -10,7 +10,7 @@
             <div class="content-primary">
                 <form id="ImdbPluginConfigForm">
                     <div class="sectionTitleContainer flex align-items-center">
-                        <h2 class="sectionTitle">IMDb Plugin Settings</h2>
+                        <h2 class="sectionTitle">Movie Ratings (IMDb + RT) Settings</h2>
                     </div>
 
                     <div class="inputContainer">
@@ -31,6 +31,21 @@
                             <input is="emby-checkbox" type="checkbox" id="chkEnableRatings" />
                             <span>Enable scheduled IMDb ratings updates</span>
                         </label>
+                    </div>
+
+                    <div class="sectionTitleContainer flex align-items-center" style="margin-top:2em">
+                        <h2 class="sectionTitle">RT Audience Ratings</h2>
+                    </div>
+
+                    <div class="checkboxContainer">
+                        <label class="emby-checkbox-label">
+                            <input is="emby-checkbox" type="checkbox" id="chkEnableRtAudience" />
+                            <span>Enable scheduled RT audience score updates (Popcornmeter)</span>
+                        </label>
+                        <div class="fieldDescription">
+                            Reads RT audience scores from /config/data/rt_audience_scores.json and sets CriticRating.
+                            Run fetch_rt_audience.py via cron to populate the file.
+                        </div>
                     </div>
 
                     <div class="sectionTitleContainer flex align-items-center" style="margin-top:2em">
@@ -95,6 +110,7 @@
                 document.querySelector('#txtCacheHours').value = config.ChartCacheHours || 24;
                 document.querySelector('#chkEnableRatings').checked = config.EnableRatingsTask !== false;
                 document.querySelector('#chkEnablePlaylist').checked = config.EnablePlaylistTask !== false;
+                document.querySelector('#chkEnableRtAudience').checked = config.EnableRtAudienceTask !== false;
                 Dashboard.hideLoadingMsg();
             }).catch(function () {
                 Dashboard.hideLoadingMsg();
@@ -115,6 +131,7 @@
                     config.ChartCacheHours = parseInt(document.querySelector('#txtCacheHours').value, 10) || 24;
                     config.EnableRatingsTask = document.querySelector('#chkEnableRatings').checked === true;
                     config.EnablePlaylistTask = document.querySelector('#chkEnablePlaylist').checked === true;
+                    config.EnableRtAudienceTask = document.querySelector('#chkEnableRtAudience').checked === true;
                     return ApiClient.updatePluginConfiguration(ImdbPluginConfig.pluginUniqueId, config);
                 }).then(function () {
                     Dashboard.processPluginConfigurationUpdateResult();

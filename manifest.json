@@ -1,11 +1,11 @@
 [
   {
     "category": "Metadata",
-    "description": "Syncs movie ratings from OMDb and maintains a Top 250 playlist using IMDb's official non-commercial datasets. Information courtesy of IMDb (https://www.imdb.com). Used with permission.",
+    "description": "Syncs IMDb ratings, maintains a Top 250 playlist, and provides Rotten Tomatoes audience/critic data for the web UI.",
     "guid": "8db72461-cd14-4a3c-8093-5891cf02b8d0",
-    "name": "IMDb Ratings & Top 250",
+    "name": "Movie Ratings (IMDb + RT)",
     "owner": "jpedrofontes",
-    "overview": "Syncs IMDb ratings via OMDb and maintains a Top 250 playlist from official IMDb datasets.",
+    "overview": "IMDb ratings & Top 250 playlist + Rotten Tomatoes audience/critic scores.",
     "versions": [
       {
         "version": "1.2.0.0",

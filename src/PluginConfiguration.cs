@@ -15,5 +15,7 @@ public class PluginConfiguration : BasePluginConfiguration
 
     public bool EnablePlaylistTask { get; set; } = true;
 
+    public bool EnableRtAudienceTask { get; set; } = true;
+
     public int ChartCacheHours { get; set; } = 24;
 }
