@@ -16,6 +16,14 @@
         "timestamp": "2026-08-20T14:39:16Z"
       },
       {
+        "version": "1.3.1.0",
+        "changelog": "See release notes",
+        "targetAbi": "10.11.0.0",
+        "sourceUrl": "https://github.com/jpedrofontes/jellyfin-ratings-plugin/releases/download/v1.3.1/jellyfin-imdb-plugin-v1.3.1.zip",
+        "checksum": "6828ad844c1e1cdd6c3d9d0492cfa4be",
+        "timestamp": "2026-08-20T14:40:27Z"
+      },
+      {
         "version": "1.3.0.0",
         "changelog": "See release notes",
         "targetAbi": "10.11.0.0",
