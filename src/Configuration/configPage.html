@@ -14,11 +14,11 @@
                     </div>
 
                     <div class="inputContainer">
-                        <label class="inputLabel" for="txtOmdbApiKey">OMDb API Key</label>
+                        <label class="inputLabel" for="txtOmdbApiKey">OMDb API Key (optional)</label>
                         <input is="emby-input" type="text" id="txtOmdbApiKey"
                                placeholder="Get one at omdbapi.com/apikey.aspx" />
                         <div class="fieldDescription">
-                            Required for fetching IMDb ratings and posters. Free tier allows 1,000 requests/day.
+                            Only needed for the poster provider. Ratings are fetched from IMDb's official datasets.
                         </div>
                     </div>
 
@@ -108,15 +108,15 @@
             .addEventListener('submit', function (e) {
                 e.preventDefault();
                 Dashboard.showLoadingMsg();
-                var config = {
-                    OmdbApiKey: document.querySelector('#txtOmdbApiKey').value.trim(),
-                    PlaylistId: document.querySelector('#txtPlaylistId').value.trim(),
-                    UserId: document.querySelector('#txtUserId').value.trim(),
-                    ChartCacheHours: parseInt(document.querySelector('#txtCacheHours').value, 10) || 24,
-                    EnableRatingsTask: document.querySelector('#chkEnableRatings').checked === true,
-                    EnablePlaylistTask: document.querySelector('#chkEnablePlaylist').checked === true
-                };
-                ApiClient.updatePluginConfiguration(ImdbPluginConfig.pluginUniqueId, config).then(function () {
+                ApiClient.getPluginConfiguration(ImdbPluginConfig.pluginUniqueId).then(function (config) {
+                    config.OmdbApiKey = document.querySelector('#txtOmdbApiKey').value.trim();
+                    config.PlaylistId = document.querySelector('#txtPlaylistId').value.trim();
+                    config.UserId = document.querySelector('#txtUserId').value.trim();
+                    config.ChartCacheHours = parseInt(document.querySelector('#txtCacheHours').value, 10) || 24;
+                    config.EnableRatingsTask = document.querySelector('#chkEnableRatings').checked === true;
+                    config.EnablePlaylistTask = document.querySelector('#chkEnablePlaylist').checked === true;
+                    return ApiClient.updatePluginConfiguration(ImdbPluginConfig.pluginUniqueId, config);
+                }).then(function () {
                     Dashboard.processPluginConfigurationUpdateResult();
                 }).catch(function (err) {
                     Dashboard.hideLoadingMsg();
