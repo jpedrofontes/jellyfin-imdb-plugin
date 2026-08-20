@@ -2,6 +2,7 @@ using Jellyfin.Data.Enums;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Controller.Playlists;
+using MediaBrowser.Controller.Providers;
 using MediaBrowser.Model.Entities;
 using MediaBrowser.Model.Playlists;
 using MediaBrowser.Model.Tasks;
@@ -122,6 +123,11 @@ public class ImdbPlaylistTask : IScheduledTask
         config.PlaylistId = newPlaylist.Id;
         Plugin.Instance!.SaveConfiguration();
 
+        // Apply playlist cover image if available
+        var newPlaylistItem = _libraryManager.GetItemById(Guid.Parse(newPlaylist.Id));
+        if (newPlaylistItem != null)
+            ApplyPlaylistImage(newPlaylistItem);
+
         progress.Report(80);
 
         // Add items in rank order
@@ -132,6 +138,18 @@ public class ImdbPlaylistTask : IScheduledTask
             userId).ConfigureAwait(false);
 
         progress.Report(100);
+    }
+
+    private static void ApplyPlaylistImage(BaseItem playlist)
+    {
+        const string imagePath = "/config/data/imdb_playlist_image.jpg";
+        if (!File.Exists(imagePath)) return;
+
+        playlist.SetImage(new ItemImageInfo
+        {
+            Path = imagePath,
+            Type = ImageType.Primary,
+        }, 0);
     }
 
     private Guid ResolveUserId(PluginConfiguration config)

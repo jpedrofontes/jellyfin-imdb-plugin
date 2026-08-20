@@ -40,11 +40,10 @@
                     <div class="checkboxContainer">
                         <label class="emby-checkbox-label">
                             <input is="emby-checkbox" type="checkbox" id="chkEnableRtAudience" />
-                            <span>Enable scheduled RT audience score updates (Popcornmeter)</span>
+                            <span>Enable RT score fetching (Tomatometer + Popcornmeter)</span>
                         </label>
                         <div class="fieldDescription">
-                            Reads RT audience scores from /config/data/rt_audience_scores.json and sets CriticRating.
-                            Run fetch_rt_audience.py via cron to populate the file.
+                            Fetches audience and critic scores from rottentomatoes.com for all movies.
                         </div>
                     </div>
 
@@ -57,24 +56,6 @@
                             <input is="emby-checkbox" type="checkbox" id="chkEnablePlaylist" />
                             <span>Enable scheduled Top 250 playlist updates</span>
                         </label>
-                    </div>
-
-                    <div class="inputContainer">
-                        <label class="inputLabel" for="txtPlaylistId">Playlist ID</label>
-                        <input is="emby-input" type="text" id="txtPlaylistId"
-                               placeholder="The Jellyfin playlist ID (GUID, no dashes)" />
-                        <div class="fieldDescription">
-                            Create a playlist in Jellyfin first, then find its ID in the URL when you open it.
-                        </div>
-                    </div>
-
-                    <div class="inputContainer">
-                        <label class="inputLabel" for="txtUserId">User ID</label>
-                        <input is="emby-input" type="text" id="txtUserId"
-                               placeholder="Jellyfin user ID (GUID, no dashes)" />
-                        <div class="fieldDescription">
-                            The user ID that owns the playlist. Find it in Dashboard → Users → click user → URL.
-                        </div>
                     </div>
 
                     <div class="inputContainer">
@@ -105,8 +86,6 @@
             Dashboard.showLoadingMsg();
             ApiClient.getPluginConfiguration(ImdbPluginConfig.pluginUniqueId).then(function (config) {
                 document.querySelector('#txtOmdbApiKey').value = config.OmdbApiKey || '';
-                document.querySelector('#txtPlaylistId').value = config.PlaylistId || '';
-                document.querySelector('#txtUserId').value = config.UserId || '';
                 document.querySelector('#txtCacheHours').value = config.ChartCacheHours || 24;
                 document.querySelector('#chkEnableRatings').checked = config.EnableRatingsTask !== false;
                 document.querySelector('#chkEnablePlaylist').checked = config.EnablePlaylistTask !== false;
@@ -126,8 +105,6 @@
                 Dashboard.showLoadingMsg();
                 ApiClient.getPluginConfiguration(ImdbPluginConfig.pluginUniqueId).then(function (config) {
                     config.OmdbApiKey = document.querySelector('#txtOmdbApiKey').value.trim();
-                    config.PlaylistId = document.querySelector('#txtPlaylistId').value.trim();
-                    config.UserId = document.querySelector('#txtUserId').value.trim();
                     config.ChartCacheHours = parseInt(document.querySelector('#txtCacheHours').value, 10) || 24;
                     config.EnableRatingsTask = document.querySelector('#chkEnableRatings').checked === true;
                     config.EnablePlaylistTask = document.querySelector('#chkEnablePlaylist').checked === true;
