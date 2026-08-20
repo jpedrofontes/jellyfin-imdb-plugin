@@ -1,6 +1,6 @@
+using System.Globalization;
+using System.IO.Compression;
 using System.Net.Http;
-using System.Text.Json;
-using System.Text.RegularExpressions;
 using Jellyfin.Data.Enums;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Library;
@@ -159,58 +159,77 @@ public class ImdbPlaylistTask : IScheduledTask
 
     private static async Task<Dictionary<string, int>> FetchImdbChartAsync(CancellationToken cancellationToken)
     {
-        const string url = "https://web.archive.org/web/2/https://www.imdb.com/chart/top/";
-        using var request = new HttpRequestMessage(HttpMethod.Get, url);
-        request.Headers.UserAgent.ParseAdd("Mozilla/5.0 (compatible; jellyfin-imdb-plugin/1.0)");
+        // IMDb's official non-commercial dataset
+        const string ratingsUrl = "https://datasets.imdbws.com/title.ratings.tsv.gz";
+        const string basicsUrl = "https://datasets.imdbws.com/title.basics.tsv.gz";
+        const int minVotes = 25_000;
 
-        using var response = await _httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
-        if (!response.IsSuccessStatusCode)
-            return new Dictionary<string, int>();
-
-        var html = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
-
-        var match = Regex.Match(html, @"<script id=""__NEXT_DATA__""[^>]*>(.*?)</script>", RegexOptions.Singleline);
-        if (!match.Success)
-            return new Dictionary<string, int>();
-
-        using var doc = JsonDocument.Parse(match.Groups[1].Value);
-        var ranks = new Dictionary<string, int>();
-        FindEdges(doc.RootElement, ranks, 0);
-        return ranks;
-    }
-
-    private static void FindEdges(JsonElement element, Dictionary<string, int> ranks, int depth)
-    {
-        if (depth > 12) return;
-
-        if (element.ValueKind == JsonValueKind.Object)
+        // Pass 1: stream title.basics.tsv.gz to collect movie tconsts
+        var movieIds = new HashSet<string>(StringComparer.Ordinal);
+        using (var request = new HttpRequestMessage(HttpMethod.Get, basicsUrl))
         {
-            if (element.TryGetProperty("chartTitles", out var chartTitles) &&
-                chartTitles.TryGetProperty("edges", out var edges) &&
-                edges.ValueKind == JsonValueKind.Array)
+            using var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
+            if (!response.IsSuccessStatusCode)
+                return new Dictionary<string, int>();
+
+            await using var gz = new GZipStream(await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false), CompressionMode.Decompress);
+            using var reader = new StreamReader(gz);
+            await reader.ReadLineAsync(cancellationToken).ConfigureAwait(false); // skip header
+            while (await reader.ReadLineAsync(cancellationToken).ConfigureAwait(false) is { } line)
             {
-                foreach (var edge in edges.EnumerateArray())
-                {
-                    if (edge.TryGetProperty("currentRank", out var rankEl) &&
-                        edge.TryGetProperty("node", out var node) &&
-                        node.TryGetProperty("id", out var idEl))
-                    {
-                        var id = idEl.GetString();
-                        if (!string.IsNullOrEmpty(id) && rankEl.TryGetInt32(out int rank))
-                            ranks[id] = rank;
-                    }
-                }
-                return;
+                // tconst \t titleType \t ...
+                var firstTab = line.IndexOf('\t');
+                if (firstTab < 0) continue;
+                var secondTab = line.IndexOf('\t', firstTab + 1);
+                if (secondTab < 0) continue;
+                var titleType = line.AsSpan(firstTab + 1, secondTab - firstTab - 1);
+                if (titleType.SequenceEqual("movie".AsSpan()))
+                    movieIds.Add(line.Substring(0, firstTab));
             }
+        }
 
-            foreach (var prop in element.EnumerateObject())
-                FindEdges(prop.Value, ranks, depth + 1);
-        }
-        else if (element.ValueKind == JsonValueKind.Array)
+        // Pass 2: stream title.ratings.tsv.gz to get ratings for movies
+        var ratings = new List<(string Id, double Rating, int Votes)>();
+        using (var request = new HttpRequestMessage(HttpMethod.Get, ratingsUrl))
         {
-            foreach (var item in element.EnumerateArray())
-                FindEdges(item, ranks, depth + 1);
+            using var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
+            if (!response.IsSuccessStatusCode)
+                return new Dictionary<string, int>();
+
+            await using var gz = new GZipStream(await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false), CompressionMode.Decompress);
+            using var reader = new StreamReader(gz);
+            await reader.ReadLineAsync(cancellationToken).ConfigureAwait(false); // skip header
+            while (await reader.ReadLineAsync(cancellationToken).ConfigureAwait(false) is { } line)
+            {
+                // tconst \t averageRating \t numVotes
+                var parts = line.Split('\t');
+                if (parts.Length < 3) continue;
+                if (!movieIds.Contains(parts[0])) continue;
+                if (!double.TryParse(parts[1], NumberStyles.Float, CultureInfo.InvariantCulture, out var rating)) continue;
+                if (!int.TryParse(parts[2], NumberStyles.Integer, CultureInfo.InvariantCulture, out var votes)) continue;
+                if (votes >= minVotes)
+                    ratings.Add((parts[0], rating, votes));
+            }
         }
+
+        if (ratings.Count == 0)
+            return new Dictionary<string, int>();
+
+        // Bayesian weighted rating: WR = (v/(v+m)) * R + (m/(v+m)) * C
+        var meanRating = ratings.Average(r => r.Rating);
+        var ranked = ratings
+            .Select(r =>
+            {
+                var wr = (r.Votes / (double)(r.Votes + minVotes)) * r.Rating
+                       + (minVotes / (double)(r.Votes + minVotes)) * meanRating;
+                return (r.Id, WeightedRating: wr);
+            })
+            .OrderByDescending(r => r.WeightedRating)
+            .Take(250)
+            .Select((r, i) => (r.Id, Rank: i + 1))
+            .ToDictionary(r => r.Id, r => r.Rank);
+
+        return ranked;
     }
 
     private Guid ResolveUserId(PluginConfiguration config)
