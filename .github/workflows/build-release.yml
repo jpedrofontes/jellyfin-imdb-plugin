@@ -64,7 +64,7 @@ jobs:
       - name: Upload zip to release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload ${{ github.ref_name }} jellyfin-imdb-plugin-${{ github.ref_name }}.zip
+        run: gh release upload ${{ github.ref_name }} jellyfin-imdb-plugin-${{ github.ref_name }}.zip --clobber
 
       - name: Commit updated manifest
         run: |
