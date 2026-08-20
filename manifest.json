@@ -8,6 +8,14 @@
     "overview": "Syncs IMDb ratings via OMDb and maintains a Top 250 playlist from official IMDb datasets.",
     "versions": [
       {
+        "version": "1.2.0.0",
+        "changelog": "See release notes",
+        "targetAbi": "10.11.0.0",
+        "sourceUrl": "https://github.com/jpedrofontes/jellyfin-imdb-plugin/releases/download/v1.2.0/jellyfin-imdb-plugin-v1.2.0.zip",
+        "checksum": "7ae509e41b64535641bea7a2dc855d7a",
+        "timestamp": "2026-08-20T11:34:42Z"
+      },
+      {
         "version": "1.1.0.0",
         "changelog": "See release notes",
         "targetAbi": "10.11.0.0",
