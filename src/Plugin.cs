@@ -16,11 +16,11 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
         Instance = this;
     }
 
-    public override string Name => "IMDb";
+    public override string Name => "IMDb Ratings & Top 250";
 
     public override Guid Id => new Guid("8db72461-cd14-4a3c-8093-5891cf02b8d0");
 
-    public override string Description => "Fetches IMDb ratings and posters from OMDb, and maintains the IMDb Top 250 playlist.";
+    public override string Description => "Syncs movie ratings from OMDb and maintains a Top 250 playlist using IMDb's official datasets. Information courtesy of IMDb (https://www.imdb.com). Used with permission.";
 
     public IEnumerable<PluginPageInfo> GetPages()
     {

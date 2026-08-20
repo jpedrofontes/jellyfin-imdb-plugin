@@ -1,12 +1,11 @@
 [
   {
     "category": "Metadata",
-    "description": "Fetches IMDb ratings from OMDb and maintains an IMDb Top 250 Movies playlist.",
+    "description": "Syncs movie ratings from OMDb and maintains a Top 250 playlist using IMDb's official non-commercial datasets. Information courtesy of IMDb (https://www.imdb.com). Used with permission.",
     "guid": "8db72461-cd14-4a3c-8093-5891cf02b8d0",
-    "imageUrl": "https://raw.githubusercontent.com/jpedrofontes/jellyfin-imdb-plugin/main/thumb.png",
-    "name": "IMDb",
+    "name": "IMDb Ratings & Top 250",
     "owner": "jpedrofontes",
-    "overview": "Fetches IMDb ratings and posters from OMDb, and maintains the IMDb Top 250 playlist.",
+    "overview": "Syncs IMDb ratings via OMDb and maintains a Top 250 playlist from official IMDb datasets.",
     "versions": [
       {
         "version": "1.0.0.0",
