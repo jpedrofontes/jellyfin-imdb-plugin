@@ -1,80 +1,104 @@
-# Jellyfin IMDb Plugin
+# Jellyfin Movie Ratings Plugin (IMDb + RT)
 
 <p align="center">
-  <img src="https://img.shields.io/github/v/release/jpedrofontes/jellyfin-imdb-plugin?style=flat-square" alt="Release" />
-  <img src="https://img.shields.io/github/license/jpedrofontes/jellyfin-imdb-plugin?style=flat-square" alt="License" />
-  <img src="https://img.shields.io/badge/jellyfin-10.9%2B-00a4dc?style=flat-square&logo=jellyfin" alt="Jellyfin 10.9+" />
+  <img src="https://img.shields.io/github/v/release/jpedrofontes/jellyfin-ratings-plugin?style=flat-square" alt="Release" />
+  <img src="https://img.shields.io/github/license/jpedrofontes/jellyfin-ratings-plugin?style=flat-square" alt="License" />
+  <img src="https://img.shields.io/badge/jellyfin-10.11%2B-00a4dc?style=flat-square&logo=jellyfin" alt="Jellyfin 10.11+" />
 </p>
 
-A Jellyfin plugin that replaces community ratings with real IMDb scores and automatically maintains a **Top 250 Movies** playlist in your library.
+A Jellyfin plugin that syncs **IMDb ratings**, fetches **Rotten Tomatoes audience and critic scores**, and maintains an **IMDb Top 250 playlist**.
 
 ## Features
 
-- **Ratings Sync** — Updates the community rating for every movie in your library with the actual IMDb score (via the [OMDb API](https://www.omdbapi.com))
-- **Poster Provider** — Remote image provider that makes OMDb posters available alongside your existing providers
-- **Top 250 Playlist** — Automatically creates and maintains a "IMDb Top 250 Movies" playlist using [IMDb's official non-commercial datasets](https://contribute.imdb.com/dataset), no scripts or cron jobs required
+- **IMDb Ratings** - Updates community ratings with real IMDb scores from official datasets
+- **RT Scores Fetch** - Fetches Rotten Tomatoes audience (Popcornmeter) and critic (Tomatometer) scores, including Certified Fresh and Verified Hot status
+- **Dual RT Badges** - Shows both tomato (critic) and popcorn (audience) icons side-by-side via custom JS injection
+- **Top 250 Playlist** - Automatically creates and maintains an IMDb Top 250 Movies playlist using [IMDb's official non-commercial datasets](https://contribute.imdb.com/dataset)
+- **Poster Provider** - Remote image provider using the OMDb API
 
 ## Installation
 
 ### From Plugin Repository (recommended)
 
-1. Go to **Dashboard → Plugins → Repositories**
+1. Go to **Dashboard > Plugins > Repositories**
 2. Click **+** and add:
-   - **Name:** `IMDb Plugin`
+   - **Name:** `Movie Ratings`
    - **URL:**
      ```
-     https://raw.githubusercontent.com/jpedrofontes/jellyfin-imdb-plugin/main/manifest.json
+     https://raw.githubusercontent.com/jpedrofontes/jellyfin-ratings-plugin/main/manifest.json
      ```
-3. Go to **Catalog** → find **IMDb Ratings & Top 250** → click **Install**
+3. Go to **Catalog**, find **Movie Ratings (IMDb + RT)**, click **Install**
 4. Restart Jellyfin
 
 ### Manual
 
-1. Download the latest `.zip` from [Releases](https://github.com/jpedrofontes/jellyfin-imdb-plugin/releases)
+1. Download the latest `.zip` from [Releases](https://github.com/jpedrofontes/jellyfin-ratings-plugin/releases)
 2. Extract it into your Jellyfin plugins directory:
    ```
-   <jellyfin-data>/plugins/IMDb/Jellyfin.Plugin.ImdbRatings.dll
+   <jellyfin-data>/plugins/Movie Ratings/Jellyfin.Plugin.ImdbRatings.dll
    ```
 3. Restart Jellyfin
 
 ## Configuration
 
-After installing, go to **Dashboard → Plugins → IMDb**:
+Go to **Dashboard > Plugins > Movie Ratings (IMDb + RT)**:
 
 | Setting | Description |
 |---------|-------------|
-| **OMDb API Key** | Required. Get a free key at [omdbapi.com](https://www.omdbapi.com/apikey.aspx) (1,000 req/day). |
-| **User ID** | The Jellyfin user ID for the Top 250 playlist. Found in the URL when you click a user in Dashboard → Users. |
+| **OMDb API Key** | Optional. Only needed for the poster provider. Get a free key at [omdbapi.com](https://www.omdbapi.com/apikey.aspx). |
 | **Enable Ratings Task** | Toggle the scheduled IMDb ratings sync on/off. |
 | **Enable Playlist Task** | Toggle the Top 250 playlist sync on/off. |
+| **Enable RT Audience Task** | Toggle the RT scores fetch on/off. |
+| **User ID** | Jellyfin user ID for the Top 250 playlist. |
 | **Chart Cache (hours)** | How long to cache the IMDb chart before re-fetching (default: 24h). |
 
-The Top 250 playlist is automatically found by name or created on the first run. No manual setup needed.
+## RT Badges Setup (Docker)
+
+To display both tomato and popcorn badges in the web UI, you need to mount a few files into the Jellyfin container:
+
+```yaml
+# docker-compose.yml
+services:
+  jellyfin:
+    volumes:
+      - ./scripts/index.html:/jellyfin/jellyfin-web/index.html:ro
+      - ./scripts/rt-popcorn.js:/jellyfin/jellyfin-web/rt-popcorn.js:ro
+      - ./config/data/rt_item_scores.json:/jellyfin/jellyfin-web/rt_item_scores.json:ro
+      - ./config/data/rt_certified_critics.json:/jellyfin/jellyfin-web/rt_certified_critics.json:ro
+```
+
+The `index.html` is a copy of Jellyfin's original with a single `<script defer src="rt-popcorn.js"></script>` tag added before `</body>`. The custom CSS for the rating icons goes in **Dashboard > Branding > Custom CSS**.
 
 ## How It Works
 
-### Ratings
-The plugin runs a scheduled task (daily at 3:30 AM by default) that iterates over every movie in your library, looks up its IMDb ID, and fetches the current rating from OMDb. Movies without an IMDb ID are skipped.
+### IMDb Ratings
+Runs daily at 3:30 AM. Downloads IMDb's official datasets (`title.ratings.tsv.gz`), and updates the community rating for every movie that has an IMDb ID.
 
 ### Top 250 Playlist
-Every 6 hours (by default), the plugin downloads [IMDb's official non-commercial datasets](https://contribute.imdb.com/dataset) (`title.basics.tsv.gz` and `title.ratings.tsv.gz`), computes a weighted ranking using the Bayesian average formula (the same approach IMDb uses), and reorders the playlist. If you don't have all 250 movies, it includes whichever ones you do have in the correct order.
+Runs every 6 hours. Downloads IMDb datasets (`title.basics.tsv.gz` and `title.ratings.tsv.gz`), computes a Bayesian-weighted ranking, and reorders the playlist. Optionally reads an external `imdb_chart.json` for the exact official chart ordering.
 
-## Data Sources & Attribution
+### RT Scores
+Runs daily at 4:30 AM. For each movie in your library, looks up the Rotten Tomatoes page by title slug (with search fallback for non-standard slugs), and extracts:
+- Audience score and Verified Hot status
+- Critic Certified Fresh status
 
-- **Ratings**: Fetched from the [OMDb API](https://www.omdbapi.com) (CC BY-NC 4.0)
-- **Top 250 ranking**: Computed from [IMDb Non-Commercial Datasets](https://contribute.imdb.com/dataset)
+Results are saved as JSON files that the custom web JS reads to inject the popcorn badge.
+
+## Data Sources
+
+- **IMDb Ratings & Top 250**: [IMDb Non-Commercial Datasets](https://contribute.imdb.com/dataset)
+- **Posters**: [OMDb API](https://www.omdbapi.com) (optional)
+- **RT Scores**: Scraped from [rottentomatoes.com](https://www.rottentomatoes.com) public pages
 
 > Information courtesy of [IMDb](https://www.imdb.com). Used with permission.
 
-This plugin is not endorsed by or affiliated with IMDb.com, Inc.
+This plugin is not endorsed by or affiliated with IMDb or Rotten Tomatoes.
 
 ## Building from Source
 
 ```bash
 dotnet build src/Jellyfin.Plugin.ImdbRatings.csproj -c Release -o ./output
 ```
-
-The compiled DLL will be at `output/Jellyfin.Plugin.ImdbRatings.dll`.
 
 ## License
 
