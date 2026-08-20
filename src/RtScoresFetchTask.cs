@@ -192,6 +192,14 @@ public class RtScoresFetchTask : IScheduledTask
             if (baseSlug.StartsWith("the_"))
                 variants.Add($"{baseSlug[4..]}_{year}");
         }
+        // Keep hyphens/colons as separators (e.g. "spider-man" → "spider_man")
+        var altSlug = SlugifyKeepSeparators(title);
+        if (altSlug != baseSlug)
+        {
+            variants.Add(altSlug);
+            if (year.HasValue)
+                variants.Add($"{altSlug}_{year}");
+        }
         return variants;
     }
 
@@ -199,6 +207,16 @@ public class RtScoresFetchTask : IScheduledTask
     {
         var normalized = title.Normalize(System.Text.NormalizationForm.FormKD);
         var ascii = new string(normalized.Where(c => c < 128).ToArray());
+        ascii = Regex.Replace(ascii.ToLowerInvariant(), @"[^a-z0-9\s]", "");
+        return Regex.Replace(ascii.Trim(), @"\s+", "_");
+    }
+
+    private static string SlugifyKeepSeparators(string title)
+    {
+        var normalized = title.Normalize(System.Text.NormalizationForm.FormKD);
+        var ascii = new string(normalized.Where(c => c < 128).ToArray());
+        // Replace hyphens, colons, dots with spaces (they become underscores)
+        ascii = Regex.Replace(ascii, @"[-:.]", " ");
         ascii = Regex.Replace(ascii.ToLowerInvariant(), @"[^a-z0-9\s]", "");
         return Regex.Replace(ascii.Trim(), @"\s+", "_");
     }
