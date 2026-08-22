@@ -104,6 +104,8 @@ public class ImdbPlaylistTask : IScheduledTask
             playlist = _libraryManager.GetItemById(Guid.Parse(result.Id)) as Playlist;
             if (playlist == null)
                 return;
+
+            ApplyPlaylistImage(playlist);
         }
         else if (config.PlaylistId != playlist.Id.ToString("N"))
         {
@@ -111,26 +113,34 @@ public class ImdbPlaylistTask : IScheduledTask
             Plugin.Instance!.SaveConfiguration();
         }
 
-        // Delete and recreate playlist to ensure clean state
-        _libraryManager.DeleteItem(playlist, new DeleteOptions { DeleteFileLocation = false });
-
-        var newPlaylist = await _playlistManager.CreatePlaylist(new PlaylistCreationRequest
+        // Clean up leftover empty duplicate playlists (from old delete-and-recreate logic)
+        var allPlaylists = _libraryManager.GetItemList(new InternalItemsQuery
         {
-            Name = "IMDb Top 250 Movies",
-            UserId = userId,
-        }).ConfigureAwait(false);
+            IncludeItemTypes = new[] { BaseItemKind.Playlist },
+            Recursive = true,
+        });
+        foreach (var stale in allPlaylists.OfType<Playlist>().Where(p => p.Id != playlist.Id
+            && p.Name.Contains("IMDb Top 250", StringComparison.OrdinalIgnoreCase)))
+        {
+            if (!stale.GetChildren(null, true).Any())
+                _libraryManager.DeleteItem(stale, new DeleteOptions { DeleteFileLocation = true });
+        }
 
-        config.PlaylistId = newPlaylist.Id;
-        Plugin.Instance!.SaveConfiguration();
-
-        // Apply playlist cover image if available
-        var newPlaylistItem = _libraryManager.GetItemById(Guid.Parse(newPlaylist.Id));
-        if (newPlaylistItem != null)
-            ApplyPlaylistImage(newPlaylistItem);
+        // Apply playlist cover image only if not already set
+        if (playlist.GetImageInfo(ImageType.Primary, 0) == null)
+            ApplyPlaylistImage(playlist);
 
         progress.Report(80);
 
-        // Add items in rank order
+        // Remove existing items and re-add in rank order
+        var existingItems = playlist.GetChildren(null, true).ToList();
+        if (existingItems.Count > 0)
+        {
+            await _playlistManager.RemoveItemFromPlaylistAsync(
+                playlist.Id.ToString("N"),
+                existingItems.Select(i => i.Id.ToString("N")).ToArray()).ConfigureAwait(false);
+        }
+
         var itemIds = orderedItems.Select(i => i.Id).ToArray();
         await _playlistManager.AddItemToPlaylistAsync(
             Guid.Parse(config.PlaylistId),
