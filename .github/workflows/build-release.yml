@@ -68,8 +68,8 @@ jobs:
 
       - name: Commit updated manifest
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "${{ github.actor }}"
+          git config user.email "${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com"
           git checkout main
           git add manifest.json
           git diff --cached --quiet || git commit -m "chore: update manifest for ${{ github.ref_name }}"

@@ -122,7 +122,7 @@ public class ImdbPlaylistTask : IScheduledTask
         foreach (var stale in allPlaylists.OfType<Playlist>().Where(p => p.Id != playlist.Id
             && p.Name.Contains("IMDb Top 250", StringComparison.OrdinalIgnoreCase)))
         {
-            if (!stale.GetChildren(null, true).Any())
+            if (stale.LinkedChildren.Length == 0)
                 _libraryManager.DeleteItem(stale, new DeleteOptions { DeleteFileLocation = true });
         }
 
@@ -133,12 +133,15 @@ public class ImdbPlaylistTask : IScheduledTask
         progress.Report(80);
 
         // Remove existing items and re-add in rank order
-        var existingItems = playlist.GetChildren(null, true).ToList();
-        if (existingItems.Count > 0)
+        var existingEntryIds = playlist.LinkedChildren
+            .Select(lc => lc.ItemId?.ToString("N") ?? lc.LibraryItemId)
+            .Where(id => id != null)
+            .ToArray();
+        if (existingEntryIds.Length > 0)
         {
             await _playlistManager.RemoveItemFromPlaylistAsync(
                 playlist.Id.ToString("N"),
-                existingItems.Select(i => i.Id.ToString("N")).ToArray()).ConfigureAwait(false);
+                existingEntryIds!).ConfigureAwait(false);
         }
 
         var itemIds = orderedItems.Select(i => i.Id).ToArray();
