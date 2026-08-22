@@ -8,6 +8,14 @@
     "overview": "IMDb ratings & Top 250 playlist + Rotten Tomatoes audience/critic scores.",
     "versions": [
       {
+        "version": "1.3.5.0",
+        "changelog": "See release notes",
+        "targetAbi": "10.11.0.0",
+        "sourceUrl": "https://github.com/jpedrofontes/jellyfin-ratings-plugin/releases/download/v1.3.5/jellyfin-imdb-plugin-v1.3.5.zip",
+        "checksum": "7d08bc0b053ee43bbd513d5cd0aeac25",
+        "timestamp": "2026-08-22T09:06:23Z"
+      },
+      {
         "version": "1.3.4.0",
         "changelog": "See release notes",
         "targetAbi": "10.11.0.0",
